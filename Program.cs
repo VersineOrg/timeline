@@ -75,7 +75,7 @@ class HttpServer
                             if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument user))
                             {
                                 //gets the list of friends from user
-                                List<BsonValue> tempFriends = user.GetElement("Friends").Value.AsBsonArray.ToList();
+                                List<BsonValue> tempFriends = user.GetElement("friends").Value.AsBsonArray.ToList();
                                 List<string> friends = new List<string>();
                                 
                                 foreach (BsonValue friend in tempFriends)
@@ -84,12 +84,15 @@ class HttpServer
                                 }
 
                                 List<BsonDocument> postsBson = new List<BsonDocument>();
-                                
+
                                 foreach (string friendid in friends)
                                 {
-                                    postDatabase.GetMultipleDatabaseEntries("_id", friendid,
+                                    postDatabase.GetMultipleDatabaseEntries("userId", friendid,
                                         out List<BsonDocument> friendPostsBson);
-                                    postsBson.Concat(friendPostsBson);
+                                    foreach (BsonDocument friendBson in friendPostsBson)
+                                    {
+                                        postsBson.Add(friendBson);
+                                    }
                                 }
                                 
                                 Response.Success(resp, "timeline created", Timeline.TimelineToJson(postsBson));

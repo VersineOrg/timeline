@@ -11,10 +11,11 @@ public class Timeline
     public Timeline(List<BsonDocument> postsBson)
     {
         List<string> postList = new List<string>();
-        foreach (BsonDocument post in postsBson)
+        foreach (BsonDocument postBson in postsBson)
         {
-            string newpost =  Post.PostToJson(post);
-            postList.Append(newpost);
+            Post newpost = new Post(postBson);
+            string postString = newpost.ToJson();
+            postList.Add(postString);
         }
         this.timeline = postList;
     }
