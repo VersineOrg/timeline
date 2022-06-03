@@ -109,6 +109,71 @@ class HttpServer
                         Response.Fail(resp,"invalid body");
                     }
                 }
+                else if (req.HttpMethod == "GET" && req.Url?.AbsolutePath == "/getPostsfromFriend")
+                {
+                    StreamReader reader = new StreamReader(req.InputStream);
+                    string bodyString = await reader.ReadToEndAsync();
+                    dynamic body = JsonConvert.DeserializeObject(bodyString)!;
+                
+                    string token;
+                    string friendId;
+                        
+                    try
+                    {
+                        token = ((string) body.token).Trim();
+                        friendId = ((string) body.friendId).Trim();
+                    }
+                    catch
+                    {
+                        token = "";
+                        friendId = "";
+                    }
+
+                    if (!(String.IsNullOrEmpty(token)))
+                    {
+                        string id = WebToken.GetIdFromToken(token);
+                        if (!id.Equals(""))
+                        {
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument user))
+                            {
+                                List<BsonValue> tempFriends = user.GetElement("friends").Value.AsBsonArray.ToList();
+
+                                bool isFriend = false;
+                                foreach (BsonValue friend in tempFriends)
+                                {
+                                    if (friend.AsString == friendId)
+                                    {
+                                        isFriend = true;
+                                    }
+                                }
+                                if (isFriend)
+                                {
+                                    userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id),
+                                        out BsonDocument friend);
+                                    postDatabase.GetMultipleDatabaseEntries("userId", friendId,
+                                        out List<BsonDocument> friendPostsBson);
+                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(friendPostsBson));
+                                }
+                                else
+                                {
+                                    Response.Fail(resp, "id is not a user's friend");
+                                }
+                            }
+                            else
+                            {
+                                Response.Fail(resp,"user doesn't exist");
+                            }
+                        }
+                        else
+                        {
+                            Response.Fail(resp,"invalid token");
+                        }
+                    }
+                    else
+                    {
+                        Response.Fail(resp,"invalid body");
+                    }
+                }
                 else
                 {
                     Response.Fail(resp, "404");
