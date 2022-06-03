@@ -71,10 +71,8 @@ class HttpServer
                         string id = WebToken.GetIdFromToken(token);
                         if (!id.Equals(""))
                         {
-                            Console.WriteLine(new ObjectId(id));
                             if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument user))
                             {
-                                //gets the list of friends from user
                                 List<BsonValue> tempFriends = user.GetElement("friends").Value.AsBsonArray.ToList();
                                 List<string> friends = new List<string>();
                                 
@@ -94,9 +92,7 @@ class HttpServer
                                         postsBson.Add(friendBson);
                                     }
                                 }
-                                
                                 Response.Success(resp, "timeline created", Timeline.TimelineToJson(postsBson));
-
                             }
                             else
                             {

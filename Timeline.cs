@@ -17,13 +17,23 @@ public class Timeline
             string postString = newpost.ToJson();
             postList.Add(postString);
         }
-        this.timeline = postList;
+        this.timeline = postList; 
+       
     }
 
     public static string TimelineToJson(List<BsonDocument> postsBson)
     {
-        Timeline timeline = new Timeline(postsBson);
-        string jsonString = JsonConvert.SerializeObject(timeline);
+        string jsonString = "";
+        int l = postsBson.Count;
+        for (int i = 0; i < l; i++)
+        {
+            jsonString += Post.PostToJson(postsBson[i]);
+            if (i < l - 1)
+            {
+                jsonString += ", ";
+            }
+        }
+
         return jsonString;
     }
 }
