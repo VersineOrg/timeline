@@ -73,7 +73,7 @@ class HttpServer
                         string id = WebToken.GetIdFromToken(token);
                         if (!id.Equals(""))
                         {
-                            if (userDatabase.GetSingleDatabaseEntry("_id", new BsonObjectId(new ObjectId(id)), out BsonDocument userBson))
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument userBson))
                             {
                                 User user = new User(userBson);
                                 List<BsonObjectId> friendsIdList = user.friends;

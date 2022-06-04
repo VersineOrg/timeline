@@ -14,7 +14,7 @@ public class Timeline
         int l = postsBson.Count;
         for (int i = 0; i < l; i++)
         {
-            jsonString += Post.PostToJson(postsBson[i]);
+            jsonString += Post.PostToString(postsBson[i]);
             if (i < l - 1)
             {
                 jsonString += ", ";
