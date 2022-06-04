@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using Newtonsoft.Json;
+using VersineUser;
 
 namespace timeline;
 
@@ -71,27 +72,23 @@ class HttpServer
                         string id = WebToken.GetIdFromToken(token);
                         if (!id.Equals(""))
                         {
-                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument user))
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument userBson))
                             {
-                                List<BsonValue> tempFriends = user.GetElement("friends").Value.AsBsonArray.ToList();
+                                User user = new User(userBson);
+                                List<BsonObjectId> friendsIdList = user.friends;
                                 List<string> friends = new List<string>();
                                 
-                                foreach (BsonValue friend in tempFriends)
-                                {
-                                    friends.Add(friend.AsString);
-                                }
-
                                 List<BsonDocument> postsBson = new List<BsonDocument>();
-
-                                foreach (string friendid in friends)
+                                foreach (BsonObjectId friendId in friendsIdList)
                                 {
-                                    postDatabase.GetMultipleDatabaseEntries("userId", friendid,
+                                    postDatabase.GetMultipleDatabaseEntries("userId", friendId,
                                         out List<BsonDocument> friendPostsBson);
-                                    foreach (BsonDocument friendBson in friendPostsBson)
+                                    foreach (BsonDocument post in friendPostsBson)
                                     {
-                                        postsBson.Add(friendBson);
+                                        postsBson.Add(post);
                                     }
                                 }
+
                                 Response.Success(resp, "timeline created", Timeline.TimelineToJson(postsBson));
                             }
                             else
