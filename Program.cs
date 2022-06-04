@@ -51,7 +51,7 @@ class HttpServer
                 Console.WriteLine(req.UserHostName);
                 Console.WriteLine(req.UserAgent);
                 
-                if (req.HttpMethod == "GET" && req.Url?.AbsolutePath == "/getTimeline")
+                if (req.HttpMethod == "POST" && req.Url?.AbsolutePath == "/getTimeline")
                 {
                     StreamReader reader = new StreamReader(req.InputStream);
                     string bodyString = await reader.ReadToEndAsync();
@@ -105,7 +105,7 @@ class HttpServer
                         Response.Fail(resp,"invalid body");
                     }
                 }
-                else if (req.HttpMethod == "GET" && req.Url?.AbsolutePath == "/getPostsfromFriend")
+                else if (req.HttpMethod == "POST" && req.Url?.AbsolutePath == "/getPostsfromFriend")
                 {
                     StreamReader reader = new StreamReader(req.InputStream);
                     string bodyString = await reader.ReadToEndAsync();
