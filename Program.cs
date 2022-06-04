@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using Newtonsoft.Json;
 using VersineUser;
 
+
 namespace timeline;
 
 // Default Schema for a Http Response
@@ -76,8 +77,6 @@ class HttpServer
                             {
                                 User user = new User(userBson);
                                 List<BsonObjectId> friendsIdList = user.friends;
-                                List<string> friends = new List<string>();
-                                
                                 List<BsonDocument> postsBson = new List<BsonDocument>();
                                 foreach (BsonObjectId friendId in friendsIdList)
                                 {
@@ -131,23 +130,13 @@ class HttpServer
                         string id = WebToken.GetIdFromToken(token);
                         if (!id.Equals(""))
                         {
-                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument user))
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument userBson))
                             {
-                                List<BsonValue> tempFriends = user.GetElement("friends").Value.AsBsonArray.ToList();
-
-                                bool isFriend = false;
-                                foreach (BsonValue friend in tempFriends)
-                                {
-                                    if (friend.AsString == friendId)
-                                    {
-                                        isFriend = true;
-                                    }
-                                }
-                                if (isFriend)
-                                {
-                                    userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id),
-                                        out BsonDocument friend);
-                                    postDatabase.GetMultipleDatabaseEntries("userId", friendId,
+                                User user = new User(userBson);
+                                List<BsonObjectId> friendsIdList = user.friends;
+                                if (friendsIdList.Contains(new ObjectId(friendId)))
+                                { 
+                                    postDatabase.GetMultipleDatabaseEntries("userId", new ObjectId(friendId),
                                         out List<BsonDocument> friendPostsBson);
                                     Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(friendPostsBson));
                                 }

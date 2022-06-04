@@ -13,6 +13,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
     <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
+    <PackageReference Include="VersineUser" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

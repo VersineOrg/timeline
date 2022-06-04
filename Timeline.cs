@@ -6,21 +6,8 @@ namespace timeline;
 
 public class Timeline
 {
-    public List<string> timeline { get; set; }
-
-    public Timeline(List<BsonDocument> postsBson)
-    {
-        List<string> postList = new List<string>();
-        foreach (BsonDocument postBson in postsBson)
-        {
-            Post newpost = new Post(postBson);
-            string postString = newpost.ToJson();
-            postList.Add(postString);
-        }
-        this.timeline = postList; 
-       
-    }
-
+    public List<BsonObjectId> timeline { get; set; }
+    
     public static string TimelineToJson(List<BsonDocument> postsBson)
     {
         string jsonString = "";

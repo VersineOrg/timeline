@@ -7,18 +7,13 @@ namespace timeline;
 
 public class Post
 {
-    public String UserId { get; set; }
+    public BsonObjectId UserId { get; set; }
     public String Message { get; set; }
     
-    public Post(string id, string password)
-    {
-        this.UserId = id;
-        this.Message = password;
-    }
 
     public Post(BsonDocument document)
     {
-        this.UserId = document.GetElement("userId").Value.AsString;
+        this.UserId = document.GetElement("userId").Value.AsObjectId;
         this.Message = document.GetElement("message").Value.AsString;;
     }
 
