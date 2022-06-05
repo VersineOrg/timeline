@@ -1,4 +1,5 @@
 using System.Net;
+using circles;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using Newtonsoft.Json;
@@ -20,7 +21,7 @@ class HttpServer
         
         public static HttpListener? Listener;
 
-        public static async Task HandleIncomingConnections(EasyMango.EasyMango postDatabase, EasyMango.EasyMango userDatabase)
+        public static async Task HandleIncomingConnections(EasyMango.EasyMango postDatabase, EasyMango.EasyMango userDatabase, EasyMango.EasyMango circleDatabase)
         {
 
             // Connect to the MongoDB Database
@@ -82,9 +83,24 @@ class HttpServer
                                 {
                                     postDatabase.GetMultipleDatabaseEntries("userId", friendId,
                                         out List<BsonDocument> friendPostsBson);
-                                    foreach (BsonDocument post in friendPostsBson)
+                                    foreach (BsonDocument postBson in friendPostsBson)
                                     {
-                                        postsBson.Add(post);
+                                        Post post = new Post(postBson);
+                                        bool userinCircle = false;
+                                        foreach (BsonValue circleId in post.Circles)
+                                        {
+                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
+                                                out BsonDocument circleBson);
+                                            Circle circle = new Circle(circleBson);
+                                            if (circle.users.Contains(new ObjectId(id)))
+                                            {
+                                                userinCircle = true;
+                                            }
+                                        }
+                                        if (userinCircle)
+                                        {
+                                            postsBson.Add(postBson);
+                                        }
                                     }
                                 }
 
@@ -180,15 +196,17 @@ class HttpServer
                     .Build();
             
             string connectionString = config.GetValue<String>("connectionString");
-            string databaseName = config.GetValue<String>("databaseName");
-            string collectionName = config.GetValue<String>("collectionName");
-        
-            string databaseName1 = config.GetValue<String>("databaseName1");
-            string collectionName1 = config.GetValue<String>("collectionName1");
-        
+            string postDatabaseName = config.GetValue<String>("postDatabaseName");
+            string postCollectionName = config.GetValue<String>("postCollectionName");
+            string userDatabaseName = config.GetValue<String>("userDatabaseName");
+            string userCollectionName = config.GetValue<String>("userCollectionName");
+            string circleDatabaseName = config.GetValue<String>("circleDatabaseName");
+            string circleCollectionName = config.GetValue<String>("circleCollectionName");
+            
             // Create a new EasyMango database
-            EasyMango.EasyMango postdb = new EasyMango.EasyMango(connectionString,databaseName,collectionName);
-            EasyMango.EasyMango userdb = new EasyMango.EasyMango(connectionString,databaseName1,collectionName1);
+            EasyMango.EasyMango postdb = new EasyMango.EasyMango(connectionString,postDatabaseName,postCollectionName);
+            EasyMango.EasyMango userdb = new EasyMango.EasyMango(connectionString,userDatabaseName,userCollectionName);
+            EasyMango.EasyMango circledb = new EasyMango.EasyMango(connectionString,circleDatabaseName,circleCollectionName);
             
             // Create a Http server and start listening for incoming connections
             string url = "http://*:" + config.GetValue<String>("Port") + "/";
@@ -198,7 +216,7 @@ class HttpServer
             Console.WriteLine("Listening for connections on {0}", url);
 
             // Handle requests
-            Task listenTask = HandleIncomingConnections(postdb, userdb);
+            Task listenTask = HandleIncomingConnections(postdb, userdb, circledb);
             listenTask.GetAwaiter().GetResult();
         
             // Close the listener

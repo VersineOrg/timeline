@@ -6,8 +6,6 @@ namespace timeline;
 
 public class Timeline
 {
-    public List<BsonObjectId> timeline { get; set; }
-    
     public static string TimelineToJson(List<BsonDocument> postsBson)
     {
         string jsonString = "";

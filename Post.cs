@@ -7,7 +7,7 @@ namespace timeline;
 
 public class Post
 {
-    public BsonObjectId UserId { get; set; } 
+     public BsonObjectId UserId { get; set; }
     public String Message { get; set; }
     public String PathToMedia { get; set; }
 
@@ -16,26 +16,30 @@ public class Post
 
     public List<BsonValue> Downvoter { get; set; }
     
+    public uint Date { get; set; }
+
     public Post(BsonObjectId id, string message, string pathtomedia ,List<BsonValue> circles)
     {
         UserId = id;
         Message = message;
         PathToMedia = pathtomedia;
         Circles = circles;
+        Date = (uint) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
         Upvoter = new List<BsonValue>();
         Downvoter = new List<BsonValue>();
     }
-    
+
     public Post(BsonDocument document)
     {
         UserId = document.GetElement("userId").Value.AsObjectId;
         Message = document.GetElement("message").Value.AsString;
         PathToMedia = document.GetElement("pathtomedia").Value.AsString;
+        Date = (uint) document.GetElement("date").Value.AsInt64;
         Circles = document.GetElement("circles").Value.AsBsonArray.ToList();
         Upvoter = document.GetElement("upvoter").Value.AsBsonArray.ToList();
         Downvoter = document.GetElement("downvoter").Value.AsBsonArray.ToList();
     }
-    
+
     public BsonDocument ToBson()
     {
         BsonArray circles = new BsonArray();
@@ -61,12 +65,13 @@ public class Post
                 new("userId", UserId),
                 new("message", Message),
                 new("pathtomedia", PathToMedia),
+                new("date",Date),
                 new("circles",circles),
                 new("upvoter", upvoter),
                 new("downvoter", downvoter)
             });
         return result;
-    }
+        }
     public static string PostToString(BsonDocument document)
     {
         Post post = new Post(document);
