@@ -56,7 +56,17 @@ class HttpServer
                 {
                     StreamReader reader = new StreamReader(req.InputStream);
                     string bodyString = await reader.ReadToEndAsync();
-                    dynamic body = JsonConvert.DeserializeObject(bodyString)!;
+                    dynamic body;
+                    try
+                    {
+                        body = JsonConvert.DeserializeObject(bodyString)!;
+                    }
+                    catch
+                    {
+                        Response.Fail(resp, "bad request");
+                        resp.Close();
+                        continue;
+                    }
                 
                     string token;
 
@@ -125,7 +135,17 @@ class HttpServer
                 {
                     StreamReader reader = new StreamReader(req.InputStream);
                     string bodyString = await reader.ReadToEndAsync();
-                    dynamic body = JsonConvert.DeserializeObject(bodyString)!;
+                    dynamic body;
+                    try
+                    {
+                        body = JsonConvert.DeserializeObject(bodyString)!;
+                    }
+                    catch
+                    {
+                        Response.Fail(resp, "bad request");
+                        resp.Close();
+                        continue;
+                    }
                 
                     string token;
                     string friendId;
