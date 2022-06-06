@@ -99,7 +99,7 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
+                                            circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
                                                 out BsonDocument circleBson);
                                             Circle circle = new Circle(circleBson);
                                             if (circle.users.Contains(new ObjectId(id)))
