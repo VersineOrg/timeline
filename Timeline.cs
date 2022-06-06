@@ -20,6 +20,29 @@ public class Timeline
 
             return newPostsBson;
         }
+        else if (sort == "cool")
+        {
+            long dateNow = (long) DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalHours;
+            foreach (BsonDocument bsonDocument in postsBson)
+            {
+                TimeSpan time = TimeSpan.FromSeconds(bsonDocument.GetElement("date").Value.AsInt64);
+                long votes = bsonDocument.GetElement("upvoter").Value.AsBsonArray.ToList().Count - bsonDocument.GetElement("downvoter").Value.AsBsonArray.ToList().Count;
+                if (votes < 0)
+                {
+                    votes = 1;
+                }
+                long score = (votes * votes) / (dateNow - time.Hours);
+                bsonDocument.Add("score", score);
+            }
+            IEnumerable<BsonDocument> sortedPosts = postsBson.OrderByDescending(document => document.GetElement("score").Value.AsInt64);
+            List<BsonDocument> newCoolPostsBson = new List<BsonDocument>();
+            foreach (BsonDocument bsonDocument in sortedPosts)
+            {
+                bsonDocument.Remove("score");
+                newCoolPostsBson.Add(bsonDocument);
+            }
+            return newCoolPostsBson;
+        }
         else
         {
            throw new Exception("sort is not a valid arg");

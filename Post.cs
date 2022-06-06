@@ -17,6 +17,8 @@ public class Post
     public List<BsonValue> Downvoter { get; set; }
     
     public uint Date { get; set; }
+    
+    public uint Score { get; set; }
 
     public Post(BsonObjectId id, string message, string pathtomedia ,List<BsonValue> circles)
     {
@@ -68,7 +70,7 @@ public class Post
                 new("date",Date),
                 new("circles",circles),
                 new("upvoter", upvoter),
-                new("downvoter", downvoter)
+                new("downvoter", downvoter),
             });
         return result;
         }

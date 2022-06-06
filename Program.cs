@@ -130,6 +130,84 @@ class HttpServer
                         Response.Fail(resp,"invalid body");
                     }
                 }
+                else if (req.HttpMethod == "POST" && req.Url?.AbsolutePath == "/getCoolTimeline")
+                {
+                    StreamReader reader = new StreamReader(req.InputStream);
+                    string bodyString = await reader.ReadToEndAsync();
+                    dynamic body;
+                    try
+                    {
+                        body = JsonConvert.DeserializeObject(bodyString)!;
+                    }
+                    catch
+                    {
+                        Response.Fail(resp, "bad request");
+                        resp.Close();
+                        continue;
+                    }
+                
+                    string token;
+
+                    try
+                    {
+                        token = ((string) body.token).Trim();
+                    }
+                    catch
+                    {
+                        token = "";
+                    }
+
+                    if (!(String.IsNullOrEmpty(token)))
+                    {
+                        string id = WebToken.GetIdFromToken(token);
+                        if (!id.Equals(""))
+                        {
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument userBson))
+                            {
+                                User user = new User(userBson);
+                                List<BsonObjectId> friendsIdList = user.friends;
+                                List<BsonDocument> postsBson = new List<BsonDocument>();
+                                foreach (BsonObjectId friendId in friendsIdList)
+                                {
+                                    postDatabase.GetMultipleDatabaseEntries("userId", friendId,
+                                        out List<BsonDocument> friendPostsBson);
+                                    foreach (BsonDocument postBson in friendPostsBson)
+                                    {
+                                        Post post = new Post(postBson);
+                                        bool userinCircle = false;
+                                        foreach (BsonValue circleId in post.Circles)
+                                        {
+                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
+                                                out BsonDocument circleBson);
+                                            Circle circle = new Circle(circleBson);
+                                            if (circle.users.Contains(new ObjectId(id)))
+                                            {
+                                                userinCircle = true;
+                                            }
+                                        }
+                                        if (userinCircle || post.Circles.Count == 0)
+                                        {
+                                            postsBson.Add(postBson);
+                                        }
+                                    }
+                                }
+                                List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "cool");
+                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));                            }
+                            else
+                            {
+                                Response.Fail(resp,"user doesn't exist");
+                            }
+                        }
+                        else
+                        {
+                            Response.Fail(resp,"invalid token");
+                        }
+                    }
+                    else
+                    {
+                        Response.Fail(resp,"invalid body");
+                    }
+                }
                 else if (req.HttpMethod == "POST" && req.Url?.AbsolutePath == "/getPostsfromFriend")
                 {
                     StreamReader reader = new StreamReader(req.InputStream);
