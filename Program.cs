@@ -113,8 +113,8 @@ class HttpServer
                                         }
                                     }
                                 }
-                                //List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "date");
-                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(postsBson));                            }
+                                List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "date");
+                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));                            }
                             else
                             {
                                 Response.Fail(resp,"user doesn't exist");
@@ -191,8 +191,8 @@ class HttpServer
                                         }
                                     }
                                 }
-                                //List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "cool");
-                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(postsBson));                            }
+                                List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "cool");
+                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));                            }
                             else
                             {
                                 Response.Fail(resp,"user doesn't exist");
@@ -272,8 +272,8 @@ class HttpServer
                                         }
                                     }
 
-                                    //List<BsonDocument> sortedPosts = Timeline.SortTimeline(friendPostsBson, "date");
-                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(postsBson));
+                                    List<BsonDocument> sortedPosts = Timeline.SortTimeline(friendPostsBson, "date");
+                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));
                                 }
                                 else
                                 {
