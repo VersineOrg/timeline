@@ -99,15 +99,22 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
-                                                    out BsonDocument circleBson)) ;
+                                            try
                                             {
-                                                Circle circle = new Circle(circleBson);
-                                                if (circle.users.Contains(new ObjectId(id)))
+                                                if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
+                                                        out BsonDocument circleBson)) ;
                                                 {
-                                                    userinCircle = true;
+                                                    Circle circle = new Circle(circleBson);
+                                                    if (circle.users.Contains(new ObjectId(id)))
+                                                    {
+                                                        userinCircle = true;
+                                                    }
                                                 }
                                             }
+                                            catch {
+                                                userinCircle = false;
+                                            }
+                                            
                                         }
                                         if (userinCircle || post.Circles.Count == 0)
                                         {
