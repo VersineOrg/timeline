@@ -97,15 +97,14 @@ class HttpServer
                                                 userinCircle = true;
                                             }
                                         }
-                                        if (userinCircle)
+                                        if (userinCircle || post.Circles.Count == 0)
                                         {
                                             postsBson.Add(postBson);
                                         }
                                     }
                                 }
-
-                                Response.Success(resp, "timeline created", Timeline.TimelineToJson(postsBson));
-                            }
+                                List<BsonDocument> sortedPosts = Timeline.SortTimeline(postsBson, "date");
+                                Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));                            }
                             else
                             {
                                 Response.Fail(resp,"user doesn't exist");
@@ -151,10 +150,32 @@ class HttpServer
                                 User user = new User(userBson);
                                 List<BsonObjectId> friendsIdList = user.friends;
                                 if (friendsIdList.Contains(new ObjectId(friendId)))
-                                { 
+                                {
+                                    List<BsonDocument> postsBson = new List<BsonDocument>();
                                     postDatabase.GetMultipleDatabaseEntries("userId", new ObjectId(friendId),
                                         out List<BsonDocument> friendPostsBson);
-                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(friendPostsBson));
+                                    foreach (BsonDocument postBson in friendPostsBson)
+                                    {
+                                        Post post = new Post(postBson);
+                                        bool userinCircle = false;
+                                        foreach (BsonValue circleId in post.Circles)
+                                        {
+                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
+                                                out BsonDocument circleBson);
+                                            Circle circle = new Circle(circleBson);
+                                            if (circle.users.Contains(new ObjectId(id)))
+                                            {
+                                                userinCircle = true;
+                                            }
+                                        }
+                                        if (userinCircle || post.Circles.Count == 0)
+                                        {
+                                            postsBson.Add(postBson);
+                                        }
+                                    }
+
+                                    List<BsonDocument> sortedPosts = Timeline.SortTimeline(friendPostsBson, "date");
+                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));
                                 }
                                 else
                                 {
