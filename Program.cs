@@ -240,10 +240,10 @@ class HttpServer
                         resp.Close();
                         continue;
                     }
-                
+
                     string token;
                     string friendId;
-                        
+
                     try
                     {
                         token = ((string) body.token).Trim();
@@ -275,7 +275,7 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            try 
+                                            try
                                             {
 
                                                 if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
@@ -288,10 +288,12 @@ class HttpServer
                                                     }
                                                 }
                                             }
-                                            catch {
+                                            catch
+                                            {
                                                 userinCircle = false;
                                             }
                                         }
+
                                         if (userinCircle || post.Circles.Count == 0)
                                         {
                                             postsBson.Add(postBson);
@@ -299,12 +301,67 @@ class HttpServer
                                     }
 
                                     List<BsonDocument> sortedPosts = Timeline.SortTimeline(friendPostsBson, "date");
-                                    Response.Success(resp, "retrieved posts from fren", Timeline.TimelineToJson(sortedPosts));
+                                    Response.Success(resp, "retrieved posts from fren",
+                                        Timeline.TimelineToJson(sortedPosts));
                                 }
                                 else
                                 {
                                     Response.Fail(resp, "id is not a user's friend");
                                 }
+                            }
+                            else
+                            {
+                                Response.Fail(resp, "user doesn't exist");
+                            }
+                        }
+                        else
+                        {
+                            Response.Fail(resp, "invalid token");
+                        }
+                    }
+                    else
+                    {
+                        Response.Fail(resp, "invalid body");
+                    }
+                }
+                else if (req.HttpMethod == "POST" && req.Url?.AbsolutePath == "/getSelfPosts")
+                {
+                    StreamReader reader = new StreamReader(req.InputStream);
+                    string bodyString = await reader.ReadToEndAsync();
+                    dynamic body;
+                    try
+                    {
+                        body = JsonConvert.DeserializeObject(bodyString)!;
+                    }
+                    catch
+                    {
+                        Response.Fail(resp, "bad request");
+                        resp.Close();
+                        continue;
+                    }
+                
+                    string token;
+
+                    try
+                    {
+                        token = ((string) body.token).Trim();
+                    }
+                    catch
+                    {
+                        token = "";
+                    }
+
+                    if (!(String.IsNullOrEmpty(token)))
+                    {
+                        string id = WebToken.GetIdFromToken(token);
+                        if (!id.Equals(""))
+                        {
+                            if (userDatabase.GetSingleDatabaseEntry("_id", new ObjectId(id), out BsonDocument userBson))
+                            {
+                                if(postDatabase.GetMultipleDatabaseEntries("userId", new ObjectId(id),
+                                       out List<BsonDocument> selfPostsBson));
+                                List<BsonDocument> sortedPosts = Timeline.SortTimeline(selfPostsBson, "date");
+                                Response.Success(resp, "retrieved posts from self", Timeline.TimelineToJson(sortedPosts));
                             }
                             else
                             {
