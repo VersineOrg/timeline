@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using MongoDB.Bson;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 
 namespace timeline;
@@ -84,7 +85,9 @@ public class Post
     public static string PostToString(BsonDocument document)
     {
         Post post = new Post(document);
-        string jsonString = JsonConvert.SerializeObject(post);
-        return jsonString;
+        JObject postJson = JObject.FromObject(post);
+        postJson.Property("owner")
+            .AddBeforeSelf(new JProperty("id", document.GetElement("_id").Value.AsObjectId.ToString()));
+        return postJson.ToString(Formatting.None);
     }
 }
