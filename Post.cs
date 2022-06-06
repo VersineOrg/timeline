@@ -86,7 +86,7 @@ public class Post
     {
         Post post = new Post(document);
         JObject postJson = JObject.FromObject(post);
-        postJson.Property("userId").AddBeforeSelf(new JProperty("id", document.GetElement("_id").Value.AsObjectId.ToString()));
+        postJson.Property("UserId")?.AddBeforeSelf(new JProperty("id", document.GetElement("_id").Value.AsObjectId.ToString()));
         return postJson.ToString(Formatting.None);
     }
 }
