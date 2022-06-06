@@ -99,12 +99,14 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
-                                                out BsonDocument circleBson);
-                                            Circle circle = new Circle(circleBson);
-                                            if (circle.users.Contains(new ObjectId(id)))
+                                            if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
+                                                    out BsonDocument circleBson)) ;
                                             {
-                                                userinCircle = true;
+                                                Circle circle = new Circle(circleBson);
+                                                if (circle.users.Contains(new ObjectId(id)))
+                                                {
+                                                    userinCircle = true;
+                                                }
                                             }
                                         }
                                         if (userinCircle || post.Circles.Count == 0)
@@ -177,12 +179,14 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
-                                                out BsonDocument circleBson);
-                                            Circle circle = new Circle(circleBson);
-                                            if (circle.users.Contains(new ObjectId(id)))
+                                            if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
+                                                    out BsonDocument circleBson)) ;
                                             {
-                                                userinCircle = true;
+                                                Circle circle = new Circle(circleBson);
+                                                if (circle.users.Contains(new ObjectId(id)))
+                                                {
+                                                    userinCircle = true;
+                                                }
                                             }
                                         }
                                         if (userinCircle || post.Circles.Count == 0)
@@ -258,12 +262,14 @@ class HttpServer
                                         bool userinCircle = false;
                                         foreach (BsonValue circleId in post.Circles)
                                         {
-                                            circleDatabase.GetSingleDatabaseEntry("_id", circleId.AsObjectId,
-                                                out BsonDocument circleBson);
-                                            Circle circle = new Circle(circleBson);
-                                            if (circle.users.Contains(new ObjectId(id)))
+                                            if (circleDatabase.GetSingleDatabaseEntry("_id", (circleId.AsObjectId),
+                                                    out BsonDocument circleBson)) ;
                                             {
-                                                userinCircle = true;
+                                                Circle circle = new Circle(circleBson);
+                                                if (circle.users.Contains(new ObjectId(id)))
+                                                {
+                                                    userinCircle = true;
+                                                }
                                             }
                                         }
                                         if (userinCircle || post.Circles.Count == 0)
